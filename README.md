@@ -19,4 +19,16 @@
  pytest   
  pytest-qt    
 
- ## Snapshots of working and wrong examples
+## Snapshots of working and wrong examples.
+### Valid input function and valid min and max values. 
+![Example Screenshot](valid_func_valid_vaues.png)
+### Valid input function for all operation and valid min and max values 
+![Example Screenshot](valid_all_operation.png)
+### Invalid input function error in operation. 
+![Example Screenshot](invalid_func.png)
+### Invalid input function use another char without 'x'.
+![Example Screenshot](invalid_func2.png)
+### Invalid input error in max value.
+![Example Screenshot](invalid_max_min.png)
+### Invalid input error in min value.
+![Example Screenshot](invalid_min.png)
