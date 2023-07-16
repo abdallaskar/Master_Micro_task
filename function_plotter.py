@@ -1,12 +1,17 @@
+# Abdalla
 import PySide2.QtWidgets
-import sys
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
+function_error_message = "Your function is not valid. Please enter a valid input function."
+min_max_error_message = "Your minimum and maximum value is not valid. Please enter a valid input values."
+
 
 class FunctionPlotter(PySide2.QtWidgets.QMainWindow):
+    # create main windows and set title and geometry.
+    # create Gui labels and input fields and button on the constractor.
     def __init__(self):
         super().__init__()
 
@@ -22,10 +27,16 @@ class FunctionPlotter(PySide2.QtWidgets.QMainWindow):
         self.plot_button = PySide2.QtWidgets.QPushButton("Plot")
         self.plot_button.clicked.connect(self.plot_function)
 
+        # create figure for plotting on it .
         self.figure = plt.figure()
         self.canvas = FigureCanvas(self.figure)
 
         self.layout = PySide2.QtWidgets.QVBoxLayout()
+
+        self.message_box = PySide2.QtWidgets.QMessageBox(self)
+        self.message_box.setIcon(PySide2.QtWidgets.QMessageBox.Critical)
+        self.message_box.setWindowTitle("Error")
+        self.message_box.addButton(PySide2.QtWidgets.QMessageBox.Ok)
 
         # Create a QHBoxLayout for the input labels and fields
         input_layout = PySide2.QtWidgets.QHBoxLayout()
@@ -49,22 +60,22 @@ class FunctionPlotter(PySide2.QtWidgets.QMainWindow):
         self.max_label.setFont(font)
         self.max_input.setFont(font)
 
-        # Add margin between the labels and input fields
+        # Add margin between layout
         input_layout.setContentsMargins(10, 30, 15, 30)
         min_layout.setContentsMargins(10, 15, 30, 30)
 
         # Change the size and color of the button
         button_font = PySide2.QtGui.QFont()
-        button_font.setPointSize(12)
+        button_font.setPointSize(16)
         self.plot_button.setFont(button_font)
-        self.plot_button.setStyleSheet("background-color: #ffcc00; color: #000000;")
-        self.plot_button.setFixedWidth(100)
+        self.plot_button.setStyleSheet("background-color: #7393B3; color: #000000;")
+        self.plot_button.setFixedWidth(140)
 
         # Create a QHBoxLayout for the button with centered alignment
         button_layout = PySide2.QtWidgets.QHBoxLayout()
-        button_layout.addStretch(1)
+        button_layout.addStretch(2)
         button_layout.addWidget(self.plot_button)
-        button_layout.addStretch(1)
+        button_layout.addStretch(2)
 
         # Add the input layout, button layout, and other widgets to the main layout
         self.layout.addLayout(input_layout)
@@ -78,26 +89,27 @@ class FunctionPlotter(PySide2.QtWidgets.QMainWindow):
 
     def plot_function(self):
 
+        # Get input from function input, min input and max input
         input_function = self.function_input.text()
         min_input_text = self.min_input.text()
         max_input_text = self.max_input.text()
 
-        # Check if either min or max value is empty
-
+        # Check if function, min and max values is valid
         valid_function = self.validate_input(input_function)
         valid_min_max = self.validate_min_max(min_input_text, max_input_text)
 
+        # if input is valid plot the function.
         if valid_function and valid_min_max:
 
             min_value = eval(min_input_text)
             max_value = eval(max_input_text)
 
-            x = sp.symbols('x')
+            varible = sp.symbols('x')
             expression = sp.sympify(input_function)
 
             # Generate x values using NumPy's linspace
             x_values = np.linspace(min_value, max_value, 500)
-            y_values = [expression.subs(x, val) for val in x_values]
+            y_values = [expression.subs(varible, val) for val in x_values]
 
             self.figure.clear()
             ax = self.figure.add_subplot(111)
@@ -106,18 +118,28 @@ class FunctionPlotter(PySide2.QtWidgets.QMainWindow):
             self.canvas.draw()
 
         elif not valid_function:
-            self.show_invalid_input_function()
+            self.figure.clear()
+            # Redraw the canvas after plotting or displaying an error
+            self.canvas.draw()
+            self.show_error_message(function_error_message)
         elif not valid_min_max:
-            self.show_min_max_error()
-
-
+            self.figure.clear()
+            # Redraw the canvas after plotting or displaying an error
+            self.canvas.draw()
+            self.show_error_message(min_max_error_message)
 
     def validate_input(self, input_check):
         try:
-            x = sp.symbols('x')
+
             expression = sp.sympify(input_check)
-            expression.subs(x, 0)  # Evaluate the expression at x=0
-            return True
+            variables = expression.free_symbols
+            x = sp.symbols('x')
+
+            if len(variables) == 1 and x in variables:
+                return True
+            else:
+                return False
+
         except (sp.SympifyError, TypeError):
             return False
 
@@ -132,29 +154,6 @@ class FunctionPlotter(PySide2.QtWidgets.QMainWindow):
         except ValueError:
             return False
 
-    def show_min_max_error(self):
-        error_message = "Your minimum and maximum value is not valid. Please enter a valid input values."
-        message_box = PySide2.QtWidgets.QMessageBox(self)
-        message_box.setIcon(PySide2.QtWidgets.QMessageBox.Critical)
-        message_box.setWindowTitle("Error")
-        message_box.setText(error_message)
-        message_box.addButton(PySide2.QtWidgets.QMessageBox.Ok)
-        message_box.exec_()
-        return
-
-    def show_invalid_input_function(self):
-        error_message = "Your function is not valid. Please enter a valid input function."
-        message_box = PySide2.QtWidgets.QMessageBox(self)
-        message_box.setIcon(PySide2.QtWidgets.QMessageBox.Critical)
-        message_box.setWindowTitle("Error")
-        message_box.setText(error_message)
-        message_box.addButton(PySide2.QtWidgets.QMessageBox.Ok)
-        message_box.exec_()
-        return
-
-
-if __name__ == "__main__":
-    app = PySide2.QtWidgets.QApplication(sys.argv)
-    window = FunctionPlotter()
-    window.show()
-    sys.exit(app.exec_())
+    def show_error_message(self, error_message):
+        self.message_box.setText(error_message)
+        self.message_box.exec_()
