@@ -22,3 +22,53 @@ def test_plot_function_valid_input(qtbot):
     assert window.message_box.isHidden()
 
 
+def test_invalid_func(qtbot):
+    window = FunctionPlotter()
+    window.function_input.setText("x^3+")
+    window.min_input.setText("5")
+    window.max_input.setText("125")
+
+    assert isinstance(qtbot, object)
+    qtbot.mouseClick(window.plot_button, Qt.LeftButton)
+
+    assert len(window.figure.axes) == 0
+    assert window.message_box.isEnabled()
+
+
+def test_invalid_symbol(qtbot):
+    window = FunctionPlotter()
+    window.function_input.setText("y^3+3*y")
+    window.min_input.setText("5")
+    window.max_input.setText("125")
+
+    assert isinstance(qtbot, object)
+    qtbot.mouseClick(window.plot_button, Qt.LeftButton)
+
+    assert len(window.figure.axes) == 0
+    assert window.message_box.isEnabled()
+
+
+def test_invalid_min(qtbot):
+    window = FunctionPlotter()
+    window.function_input.setText("x^3")
+    window.min_input.setText("a")
+    window.max_input.setText("125")
+
+    assert isinstance(qtbot, object)
+    qtbot.mouseClick(window.plot_button, Qt.LeftButton)
+
+    assert len(window.figure.axes) == 0
+    assert window.message_box.isEnabled()
+
+
+def test_invalid_max(qtbot):
+    window = FunctionPlotter()
+    window.function_input.setText("x^2 + 3*x")
+    window.min_input.setText("5")
+    window.max_input.setText("")
+
+    assert isinstance(qtbot, object)
+    qtbot.mouseClick(window.plot_button, Qt.LeftButton)
+
+    assert len(window.figure.axes) == 0
+    assert window.message_box.isEnabled()
